@@ -75,9 +75,9 @@ type ContainerManager struct {
 	// It is used to get container ID via container name.
 	NameToID *collect.SafeMap
 
-	ImageMgr      ImageMgr
-	VolumeMgr     VolumeMgr
-	NetworkMgr    NetworkMgr
+	ImageMgr  ImageMgr
+	VolumeMgr VolumeMgr
+
 	IOs           *containerio.Cache
 	ExecProcesses *collect.SafeMap
 
@@ -89,14 +89,13 @@ type ContainerManager struct {
 }
 
 // NewContainerManager creates a brand new container manager.
-func NewContainerManager(ctx context.Context, store *meta.Store, cli *ctrd.Client, imgMgr ImageMgr, volMgr VolumeMgr, netMgr NetworkMgr, cfg *config.Config) (*ContainerManager, error) {
+func NewContainerManager(ctx context.Context, store *meta.Store, cli *ctrd.Client, imgMgr ImageMgr, volMgr VolumeMgr, cfg *config.Config) (*ContainerManager, error) {
 	mgr := &ContainerManager{
 		Store:         store,
 		NameToID:      collect.NewSafeMap(),
 		Client:        cli,
 		ImageMgr:      imgMgr,
 		VolumeMgr:     volMgr,
-		NetworkMgr:    netMgr,
 		IOs:           containerio.NewCache(),
 		ExecProcesses: collect.NewSafeMap(),
 		cache:         collect.NewSafeMap(),

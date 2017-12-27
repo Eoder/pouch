@@ -52,10 +52,6 @@ func initRoute(s *Server) http.Handler {
 	// metrics
 	r.Path("/metrics").Methods(http.MethodGet).Handler(prometheus.Handler())
 
-	// network
-	r.Path("/networks/create").Methods(http.MethodPost).Handler(s.filter(s.createNetwork))
-	r.Path("/networks/{id:.*}").Methods(http.MethodDelete).Handler(s.filter(s.deleteNetwork))
-
 	if s.Config.Debug {
 		profilerSetup(r)
 	}

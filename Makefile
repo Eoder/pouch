@@ -2,9 +2,8 @@
 GOBUILD=go build
 GOCLEAN=go clean
 GOTEST=go test
-ORIG_GOPATH=$(shell go env GOPATH)
-GOPATH=$(ORIG_GOPATH):$(ORIG_GOPATH)/src/github.com/docker/libnetwork/Godeps/_workspace
-GOPACKAGES=$(shell go list ./... | grep -v /vendor/ | grep -v /extra/ | sed 's/^_//')
+GOPATH=$(shell go env GOPATH)
+GOPACKAGES=$(shell go list ./... | grep -v /vendor/ | sed 's/^_//')
 
 # Binary name of CLI and Daemon
 BINARY_NAME=pouchd
@@ -14,13 +13,7 @@ CLI_BINARY_NAME=pouch
 DESTDIR=/usr/local
 
 .PHONY: build
-build: pre server client
-
-.PHONY: pre
-pre:
-	@ mkdir -p $(ORIG_GOPATH)/src/github.com/docker
-	@ - [ -L $(ORIG_GOPATH)/src/github.com/docker/libnetwork ] && rm -f $(ORIG_GOPATH)/src/github.com/docker/libnetwork
-	@ - ln -s $(shell pwd)/extra/libnetwork $(ORIG_GOPATH)/src/github.com/docker/libnetwork
+build: server client
 
 .PHONY: server
 server: modules
@@ -43,17 +36,17 @@ check: fmt lint vet validate-swagger
 .PHONY: fmt
 fmt: ## run go fmt
 	@echo $@
-	@test -z "$$(gofmt -s -l . 2>/dev/null | grep -Fv 'vendor/' | grep -Fv 'extra/' | grep -v ".pb.go$$" | tee /dev/stderr)" || \
+	@test -z "$$(gofmt -s -l . 2>/dev/null | grep -Fv 'vendor/' | grep -v ".pb.go$$" | tee /dev/stderr)" || \
 		(echo "please format Go code with 'gofmt -s -w'" && false)
-	@test -z "$$(find . -path ./vendor -prune -o ! -path ./extra -prune -o ! -name timestamp.proto ! -name duration.proto -name '*.proto' -type f -exec grep -Hn -e "^ " {} \; | tee /dev/stderr)" || \
+	@test -z "$$(find . -path ./vendor -prune -o ! -name timestamp.proto ! -name duration.proto -name '*.proto' -type f -exec grep -Hn -e "^ " {} \; | tee /dev/stderr)" || \
 		(echo "please indent proto files with tabs only" && false)
-	@test -z "$$(find . -path ./vendor -prune -o ! -path ./extra -prune -o -name '*.proto' -type f -exec grep -Hn "Meta meta = " {} \; | grep -v '(gogoproto.nullable) = false' | tee /dev/stderr)" || \
+	@test -z "$$(find . -path ./vendor -prune -o -name '*.proto' -type f -exec grep -Hn "Meta meta = " {} \; | grep -v '(gogoproto.nullable) = false' | tee /dev/stderr)" || \
 		(echo "meta fields in proto files must have option (gogoproto.nullable) = false" && false)
 
 .PHONY: lint
 lint: ## run go lint
 	@echo $@
-	@test -z "$$(golint ./... | grep -Fv 'vendor/' | grep -Fv 'extra' | grep -v ".pb.go:" | tee /dev/stderr)"
+	@test -z "$$(golint ./... | grep -Fv 'vendor/' | grep -v ".pb.go:" | tee /dev/stderr)"
 
 .PHONY: vet
 vet: # run go vet
@@ -61,9 +54,9 @@ vet: # run go vet
 	@test -z "$$(go vet ${GOPACKAGES} 2>&1 | grep -v "unrecognized printf verb 'r'" | egrep -v '(exit status 1)' | tee /dev/stderr)"
 
 .PHONY: unit-test
-unit-test: pre ## run go test
+unit-test: ## run go test
 	@echo $@
-	@go test `go list ./... | grep -v 'github.com/alibaba/pouch/test' | grep -v 'github.com/alibaba/pouch/extra'`
+	@go test `go list ./... | grep -v 'github.com/alibaba/pouch/test'`
 
 .PHONY: validate-swagger
 validate-swagger: ## run swagger validate

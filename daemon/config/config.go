@@ -1,7 +1,6 @@
 package config
 
 import (
-	"github.com/alibaba/pouch/network"
 	"github.com/alibaba/pouch/pkg/utils"
 	"github.com/alibaba/pouch/volume"
 )
@@ -9,10 +8,7 @@ import (
 // Config refers to daemon's whole configurations.
 type Config struct {
 	//Volume config
-	VolumeConfig volume.Config
-
-	// Network config
-	NetworkConfg network.Config
+	volume.Config
 
 	// Server listening address.
 	Listen []string
